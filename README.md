@@ -27,6 +27,9 @@ Maybe that means we can evaluate the efficacy of these predictions.
 Code
 ====
 
+To run this code you need a Forecast.io API key. Sign up at developers.forecast.io (or something like that).
+Put the API key in `FORECASTIO_API_KEY.txt` by itself; this file is explicitly hidden from the repo by `.gitignore`
+
 https://github.com/bitpixdigital/forecastiopy3
 this isn't on pip, so to install:
 * ```$ git clone --depth 1 https://github.com/bitpixdigital/forecastiopy3.git
