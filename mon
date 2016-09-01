@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# For this to work, you must have remote mail delivery working on the server this is run on
+# for Debian servers, this means running `dpkg-reconfigure exim4-config` and picking either a smarthost
+# for sendmail-based servers, try crying.
+# etc.
+# you'll have to do your own research here.
+
+CITY="$1"
+scrape_location_dailies $CITY 2>&1 | mail -E -v -s "Forecast.io scrape error -- $CITY" weatherbot@kousu.ca

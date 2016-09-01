@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# make sure the directory *we're* in is on the PATH
+# because I'm doing this wandows-style with all the local bins together
+HERE=$(cd $(dirname $0) && echo $PWD)
+export PATH=$HERE:$PATH
+
+LOCATION=$1
+if [ -z $LOCATION ]; then
+  echo "usage: d location # dataset/$city/location.latlon must exist"
+  exit 1
+fi
+
+mkdir dataset 2>/dev/null;
+cd dataset/$LOCATION &&
+scrape_daily `cat location.latlon` > "daily$(date '+%Y%m%d%H%M%S').json"

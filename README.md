@@ -44,3 +44,8 @@ $ python3
 This was the other one:
 https://github.com/ZeevG/python-forecast.io
 
+
+Current Design:
+* scrape_daily takes a lat/lon pair and prints the 7 day results in JSON to stdout
+* scrape_location_dailies CITY takes a city name, assumes dataset/$CITY exists, reads a latlon pair from dataset/$CITY/location.latlon and saves the output from scrape_daily to dataset/$CITY/daily$TIME.json
+* mon $CITY runs scrape_location_dailies and reports the results
