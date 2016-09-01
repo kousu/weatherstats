@@ -36,7 +36,8 @@ Underlying API docs are https://developer.forecast.io/docs/v2
 https://github.com/bitpixdigital/forecastiopy3
 this isn't on pip, so to install:
 
-```$ git clone --depth 1 https://github.com/bitpixdigital/forecastiopy3.git
+```
+$ git clone --depth 1 https://github.com/bitpixdigital/forecastiopy3.git
 $ cd forecastiopy3
 $ python3 setup.py install --user
 $ # to test it worked:
