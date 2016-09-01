@@ -54,6 +54,7 @@ Current Design:
 * mon $CITY runs scrape_location_dailies and reports the results
 
 Suggestion: run mon with cron, something like this:
+
 ```
 0 */3 * * * ~/weatherstats/mon montreal
 0 */3 * * * ~/weatherstats/mon toronto
