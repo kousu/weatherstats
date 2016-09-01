@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # For this to work, you must have remote mail delivery working on the server this is run on
 # for Debian servers, this means running `dpkg-reconfigure exim4-config` and picking either a smarthost
@@ -6,5 +6,11 @@
 # etc.
 # you'll have to do your own research here.
 
+# make sure the directory *we're* in is on the PATH
+# because I'm doing this wandows-style with all the local bins together
+HERE=$(cd $(dirname $0) && echo $PWD)
+export PATH=$HERE:$PATH
+
 CITY="$1"
-scrape_location_dailies $CITY 2>&1 | mail -E -v -s "Forecast.io scrape error -- $CITY" weatherbot@kousu.ca
+cd $HERE #scrape_location_dailies needs this
+scrape_location_dailies $CITY 2>&1 | tee >(mail -E -s "Forecast.io scrape error -- $CITY" weatherbot@kousu.ca)
