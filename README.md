@@ -30,6 +30,9 @@ Code
 To run this code you need a Forecast.io API key. Sign up at developers.forecast.io (or something like that).
 Put the API key in `FORECASTIO_API_KEY.txt` by itself; this file is explicitly hidden from the repo by `.gitignore`
 
+Underlying API docs are https://developer.forecast.io/docs/v2
+
+
 https://github.com/bitpixdigital/forecastiopy3
 this isn't on pip, so to install:
 * ```$ git clone --depth 1 https://github.com/bitpixdigital/forecastiopy3.git
@@ -49,3 +52,9 @@ Current Design:
 * scrape_daily takes a lat/lon pair and prints the 7 day results in JSON to stdout
 * scrape_location_dailies CITY takes a city name, assumes dataset/$CITY exists, reads a latlon pair from dataset/$CITY/location.latlon and saves the output from scrape_daily to dataset/$CITY/daily$TIME.json
 * mon $CITY runs scrape_location_dailies and reports the results
+
+Suggestion: run mon with cron, something like this:
+```
+0 */3 * * * ~/weatherstats/mon montreal
+0 */3 * * * ~/weatherstats/mon toronto
+```
