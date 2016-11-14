@@ -8,9 +8,18 @@ import re, time, datetime
 import itertools
 
 def dailyjson2tables(f):
-    datestamp = re.match("daily(\d{14}).json", f).groups()[0] # filename -> text with a date in it
+
+    # XXX this function is named wrong; it doesn't make a table, all it does is append an extra column by extracting a datetime from the filenames
+    # TODO: pickkkk a better name
+    
+    datestamp = re.search("daily(\d{14}).json$", f)
+    if not datestamp: # if the filename did not match the regex
+        return
+    datestamp = datestamp.groups()[0] # filename -> text with a date in it
     datestamp = time.strptime(datestamp, "%Y%m%d%H%M%S") # str -> struct_time
     datestamp = datetime.datetime.fromtimestamp(time.mktime(datestamp)) # struct_time -> datetime
+    # note: these datasets already include a bunch of times, in unix epoch format, so we follow
+    datestamp = int(datestamp.timestamp()) # datetime -> unix epoch
 
     # datestamp is when the prediction was made
     # date is when the prediction is for
@@ -21,25 +30,68 @@ def dailyjson2tables(f):
 
     assert isinstance(D, list)
     assert len(D) == 8 # one week of data each! (wait..8?)
-    for offset, sample in enumerate(D):
-        date = (datestamp + datetime.timedelta(offset)).date()
-        sample['prediction_timestamp'] = datestamp
-        sample['date'] = date # when the prediction is for
+    for sample in D:
+        sample['prediction_time'] = datestamp
         yield sample 
 
 def iterpeek(I):
-        # peek at an iterators
+        # peek at an iterator's first element without affecting the iterator
+        # returns: first element, I
+
         # (http://stackoverflow.com/questions/29761185/how-to-peek-at-iterator-while-leaving-the-items-on suggests using tee, but I think that would cause I to be copied into memory until all its tees are exhausted completely, which is *not* what I want)
         E = next(I)
         return E, itertools.chain([E], I)
 
 if __name__ == '__main__':
 
+    # cat all the files together while converting them to 
     rows = itertools.chain.from_iterable(dailyjson2tables(f) for f in sys.argv[1:]) # from_iterable is a python wart, but an efficient one
 
     W = csv.writer(sys.stdout)
     # for speed, we assume (maybe incorrectly) that the very first data point has all the columns in it
-    headers, rows = iterpeek(rows)
-    headers = list(headers.keys()) # fix the order of headers # TODO: sort??
+    #headers, rows = iterpeek(rows)
+    #headers = list(headers.keys()) # fix the order of headers # TODO: sort?? can i manually sort them here?
+    headers = ["prediction_time",
+              "apparentTemperatureMax",
+              "apparentTemperatureMaxTime",
+              "apparentTemperatureMin",
+              "apparentTemperatureMinTime",
+              "cloudCover",
+              "dewPoint",
+              "humidity",
+              "icon",
+              "moonPhase",
+              "ozone",
+              "precipIntensity",
+              "precipIntensityMax",
+              "precipIntensityMaxTime",
+              "precipProbability",
+              "precipType",
+              "precipAccumulation",
+              "pressure",
+              "summary",
+              "sunriseTime",
+              "sunsetTime",
+              "temperatureMax",
+              "temperatureMaxTime",
+              "temperatureMin",
+              "temperatureMinTime",
+              "time",
+              "visibility",
+              "windBearing",
+              "windSpeed",
+              ]
+
     W.writerow(headers)
-    W.writerows(list(row.get(h,None) for h in headers) for row in rows) # write the rows, converting to a list 
+    #write the rows, converting to a list 
+    #W.writerows(list(row.get(h,None) for h in headers) for row in rows) 
+    for row in rows:
+            # DEBUG: determine if there's any headers we missed
+            assert set(row.keys()).issubset(set(headers)), "Missed headers: %s" % (set(row.keys()) - set(headers),)
+            row = list(row.get(h,None) for h in headers)
+            W.writerow(row)
+    # note: not every row has exactly the same entries!!!!!!! peeking is a faulty assumptioN!!!ofisjd
+    # proper fix: double scan to collect all the entries
+    # what i'm going to do: make sure to always prefix a run of this with a single file whose purpose is just to get the headers right
+    # another possible fix and what I actually did: manually hardcode the list of columns; bonus: then the dataset is nicer to look at
+    # bonzai!
