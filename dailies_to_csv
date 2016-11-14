@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+
+import sys
+
+import json
+import csv
+import re, time, datetime
+import itertools
+
+def dailyjson2tables(f):
+    datestamp = re.match("daily(\d{14}).json", f).groups()[0] # filename -> text with a date in it
+    datestamp = time.strptime(datestamp, "%Y%m%d%H%M%S") # str -> struct_time
+    datestamp = datetime.datetime.fromtimestamp(time.mktime(datestamp)) # struct_time -> datetime
+
+    # datestamp is when the prediction was made
+    # date is when the prediction is for
+    # note: datestamp has a time (hour/minute/second) component; date is just year/month/day
+    
+    I = open(f)
+    D = json.load(I)
+
+    assert isinstance(D, list)
+    assert len(D) == 8 # one week of data each! (wait..8?)
+    for offset, sample in enumerate(D):
+        date = (datestamp + datetime.timedelta(offset)).date()
+        sample['prediction_timestamp'] = datestamp
+        sample['date'] = date # when the prediction is for
+        yield sample 
+
+def iterpeek(I):
+        # peek at an iterators
+        # (http://stackoverflow.com/questions/29761185/how-to-peek-at-iterator-while-leaving-the-items-on suggests using tee, but I think that would cause I to be copied into memory until all its tees are exhausted completely, which is *not* what I want)
+        E = next(I)
+        return E, itertools.chain([E], I)
+
+if __name__ == '__main__':
+
+    rows = itertools.chain.from_iterable(dailyjson2tables(f) for f in sys.argv[1:]) # from_iterable is a python wart, but an efficient one
+
+    W = csv.writer(sys.stdout)
+    # for speed, we assume (maybe incorrectly) that the very first data point has all the columns in it
+    headers, rows = iterpeek(rows)
+    headers = list(headers.keys()) # fix the order of headers # TODO: sort??
+    W.writerow(headers)
+    W.writerows(list(row.get(h,None) for h in headers) for row in rows) # write the rows, converting to a list 
